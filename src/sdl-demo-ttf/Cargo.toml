@@ -10,8 +10,8 @@ authors = [
 name = "sdl-demo"
 path = "main.rs"
 
-[dependencies.sdl]
-path = "../.."
-
 [dependencies]
 rand = "^0.8.5"
+sdl = { path = "../.." }
+sdl_image = { path = "../sdl_image" }
+sdl_ttf = { path = "../sdl_ttf" }

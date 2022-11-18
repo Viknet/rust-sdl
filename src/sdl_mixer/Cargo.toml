@@ -19,4 +19,4 @@ path = "lib.rs"
 path = "../.."
 
 [dependencies]
-libc = "0.1"
+libc = "^0.2.137"

@@ -1,22 +1,22 @@
 extern crate libc;
 extern crate sdl;
 
-use std::path::Path;
+use libc::c_int;
 use std::ffi::CString;
-use libc::{c_int};
+use std::path::Path;
 
 use sdl::audio::{AudioFormat, Channels};
-use sdl::video::ll::SDL_RWFromFile; // XXX refactoring
 use sdl::get_error;
+use sdl::video::ll::SDL_RWFromFile; // XXX refactoring
 
 // Setup linking for all targets.
 #[cfg(any(not(target_os = "macos"), not(mac_framework)))]
 #[link(name = "SDL_mixer")]
-extern {}
+extern "C" {}
 
 #[cfg(all(target_os = "macos", mac_framework))]
 #[link(name = "SDL_mixer", kind = "framework")]
-extern {}
+extern "C" {}
 
 pub mod ll {
     #![allow(non_camel_case_types)]
@@ -25,7 +25,6 @@ pub mod ll {
 
     use libc::c_int;
 
-    #[allow(raw_pointer_derive)] 
     #[repr(C)]
     #[derive(Copy, Clone)]
     pub struct Mix_Chunk {
@@ -36,16 +35,27 @@ pub mod ll {
     }
 
     extern "C" {
-        pub fn Mix_OpenAudio(frequency: c_int, format: u16, channels: c_int, chunksize: c_int)
-              -> c_int;
-        pub fn Mix_QuerySpec(frequency: *mut c_int, format: *mut u16, channels: *mut c_int)
-              -> c_int;
+        pub fn Mix_OpenAudio(
+            frequency: c_int,
+            format: u16,
+            channels: c_int,
+            chunksize: c_int,
+        ) -> c_int;
+        pub fn Mix_QuerySpec(
+            frequency: *mut c_int,
+            format: *mut u16,
+            channels: *mut c_int,
+        ) -> c_int;
         pub fn Mix_LoadWAV_RW(src: *mut SDL_RWops, freesrc: c_int) -> *mut Mix_Chunk;
         pub fn Mix_FreeChunk(chunk: *mut Mix_Chunk);
         pub fn Mix_AllocateChannels(numchans: c_int) -> c_int;
         pub fn Mix_Playing(channel: c_int) -> c_int;
-        pub fn Mix_PlayChannelTimed(channel: c_int, chunk: *mut Mix_Chunk, loops: c_int, ticks: c_int)
-              -> c_int;
+        pub fn Mix_PlayChannelTimed(
+            channel: c_int,
+            chunk: *mut Mix_Chunk,
+            loops: c_int,
+            ticks: c_int,
+        ) -> c_int;
         pub fn Mix_GetChunk(channel: c_int) -> *mut Mix_Chunk;
         pub fn Mix_CloseAudio();
         pub fn Mix_Volume(channel: c_int, volume: c_int) -> c_int;
@@ -57,19 +67,19 @@ pub mod ll {
 }
 
 pub struct Chunk {
-    data: ChunkData
+    data: ChunkData,
 }
 
 #[allow(unused)]
 enum ChunkData {
     Borrowed(*mut ll::Mix_Chunk),
     Allocated(*mut ll::Mix_Chunk),
-    OwnedBuffer(ChunkAndBuffer)
+    OwnedBuffer(ChunkAndBuffer),
 }
 
 struct ChunkAndBuffer {
     pub buffer: Vec<u8>,
-    pub ll_chunk: ll::Mix_Chunk
+    pub ll_chunk: ll::Mix_Chunk,
 }
 
 unsafe fn check_if_not_playing(ll_chunk_addr: *mut ll::Mix_Chunk) {
@@ -86,7 +96,7 @@ unsafe fn check_if_not_playing(ll_chunk_addr: *mut ll::Mix_Chunk) {
         channels = 0;
     }
 
-    for ch in 0 .. (channels as usize) {
+    for ch in 0..(channels as usize) {
         if ll::Mix_GetChunk(ch as i32) == ll_chunk_addr {
             panic!("attempt to free a channel that's playing!")
         }
@@ -101,7 +111,7 @@ impl Drop for Chunk {
                 ChunkData::Allocated(ll_chunk) => {
                     check_if_not_playing(ll_chunk);
                     ll::Mix_FreeChunk(ll_chunk);
-                },
+                }
                 ChunkData::OwnedBuffer(ref mut chunk) => {
                     check_if_not_playing(&mut chunk.ll_chunk);
                 }
@@ -115,29 +125,30 @@ impl Chunk {
         let buffer_addr: *mut u8 = buffer.as_mut_ptr();
         let buffer_len = buffer.len() as u32;
         Chunk {
-            data: ChunkData::OwnedBuffer(
-                ChunkAndBuffer {
-                    buffer: buffer,
-                    ll_chunk: ll::Mix_Chunk {
-                        allocated: 0,
-                        abuf: buffer_addr,
-                        alen: buffer_len,
-                        volume: volume
-                    }
-                }
-            )
+            data: ChunkData::OwnedBuffer(ChunkAndBuffer {
+                buffer: buffer,
+                ll_chunk: ll::Mix_Chunk {
+                    allocated: 0,
+                    abuf: buffer_addr,
+                    alen: buffer_len,
+                    volume: volume,
+                },
+            }),
         }
     }
 
     pub fn from_wav(path: &Path) -> Result<Chunk, String> {
         let cpath = CString::new(path.to_str().unwrap()).unwrap();
         let mode = CString::new("rb".as_bytes()).unwrap();
-        let raw = unsafe {
-            ll::Mix_LoadWAV_RW(SDL_RWFromFile(cpath.as_ptr(), mode.as_ptr()), 1)
-        };
+        let raw = unsafe { ll::Mix_LoadWAV_RW(SDL_RWFromFile(cpath.as_ptr(), mode.as_ptr()), 1) };
 
-        if raw.is_null() { Err(get_error()) }
-        else { Ok(Chunk { data: ChunkData::Allocated(raw) }) }
+        if raw.is_null() {
+            Err(get_error())
+        } else {
+            Ok(Chunk {
+                data: ChunkData::Allocated(raw),
+            })
+        }
     }
 
     pub fn to_ll_chunk(&self) -> *const ll::Mix_Chunk {
@@ -182,10 +193,20 @@ impl Chunk {
     }
 }
 
-pub fn open(frequency: c_int, format: AudioFormat, channels: Channels, chunksize: c_int)
-         -> Result<(),()> {
+pub fn open(
+    frequency: c_int,
+    format: AudioFormat,
+    channels: Channels,
+    chunksize: c_int,
+) -> Result<(), ()> {
     unsafe {
-        if ll::Mix_OpenAudio(frequency, format.to_ll_format(), channels.count(), chunksize) == 0 {
+        if ll::Mix_OpenAudio(
+            frequency,
+            format.to_ll_format(),
+            channels.count(),
+            chunksize,
+        ) == 0
+        {
             Ok(())
         } else {
             Err(())
@@ -194,9 +215,7 @@ pub fn open(frequency: c_int, format: AudioFormat, channels: Channels, chunksize
 }
 
 pub fn close() {
-    unsafe {
-        ll::Mix_CloseAudio()
-    }
+    unsafe { ll::Mix_CloseAudio() }
 }
 
 #[derive(Copy, Clone)]
@@ -217,22 +236,24 @@ pub fn query() -> Option<Query> {
         Some(Query {
             frequency: frequency,
             format: AudioFormat::from_ll_format(ll_format),
-            channels: if ll_channels == 1 { Channels::Mono } else { Channels::Stereo }
+            channels: if ll_channels == 1 {
+                Channels::Mono
+            } else {
+                Channels::Stereo
+            },
         })
     }
 }
 
 pub fn allocate_channels(numchans: c_int) -> c_int {
-    unsafe {
-        ll::Mix_AllocateChannels(numchans)
-    }
+    unsafe { ll::Mix_AllocateChannels(numchans) }
 }
 
 pub fn playing(channel: Option<c_int>) -> bool {
     unsafe {
         match channel {
             Some(channel) => ll::Mix_Playing(channel) == 0,
-            None => ll::Mix_Playing(-1) == 0
+            None => ll::Mix_Playing(-1) == 0,
         }
     }
 }
@@ -241,7 +262,7 @@ pub fn num_playing(channel: Option<c_int>) -> c_int {
     unsafe {
         match channel {
             Some(channel) => ll::Mix_Playing(channel),
-            None => ll::Mix_Playing(-1)
+            None => ll::Mix_Playing(-1),
         }
     }
 }
@@ -276,12 +297,14 @@ pub fn newest_in_group(tag: Option<c_int>) -> Option<c_int> {
     unsafe {
         let ll_tag = tag.unwrap_or(-1);
         let channel = ll::Mix_GroupNewer(ll_tag);
-        if channel == -1 {None} else {Some(channel)}
+        if channel == -1 {
+            None
+        } else {
+            Some(channel)
+        }
     }
 }
 
 pub fn halt_channel(channel: c_int) -> c_int {
-    unsafe {
-        ll::Mix_HaltChannel(channel)
-    }
+    unsafe { ll::Mix_HaltChannel(channel) }
 }

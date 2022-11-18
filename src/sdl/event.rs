@@ -1,17 +1,16 @@
-use std::mem;
 use libc::c_int;
-use std::slice;
 use num::FromPrimitive;
 use std::ffi::CStr;
+use std::mem;
+use std::slice;
 use std::str;
 
 pub mod ll {
     #![allow(non_camel_case_types)]
 
-    use std::mem;
-    use libc::{c_void, c_int, c_uint, c_uchar, uint8_t, uint16_t, int16_t};
-    use libc::types::os::arch::c95::c_schar;
     pub use keysym::*;
+    use libc::{c_char, c_int, c_uint, c_void};
+    use std::mem;
 
     pub type SDL_EventType = c_uint;
     pub type SDLMod = c_uint;
@@ -46,99 +45,99 @@ pub mod ll {
     #[repr(C)]
     #[derive(Copy, Clone)]
     pub struct SDL_keysym {
-        pub scancode: uint8_t,
+        pub scancode: u8,
         pub sym: SDLKey,
         pub _mod: SDLMod,
-        pub unicode: uint16_t,
+        pub unicode: u16,
     }
 
     #[repr(C)]
     #[derive(Copy, Clone)]
     pub struct SDL_Event {
-        pub data: [c_uchar; 24],
+        pub data: [u8; 24],
     }
 
     #[repr(C)]
     #[derive(Copy, Clone)]
     pub struct SDL_ActiveEvent {
-        pub _type: uint8_t,
-        pub gain: uint8_t,
-        pub state: uint8_t,
+        pub _type: u8,
+        pub gain: u8,
+        pub state: u8,
     }
 
     #[repr(C)]
     #[derive(Copy, Clone)]
     pub struct SDL_KeyboardEvent {
-        pub _type: uint8_t,
-        pub which: uint8_t,
-        pub state: uint8_t,
+        pub _type: u8,
+        pub which: u8,
+        pub state: u8,
         pub keysym: SDL_keysym,
     }
 
     #[repr(C)]
     #[derive(Copy, Clone)]
     pub struct SDL_MouseMotionEvent {
-        pub _type: uint8_t,
-        pub which: uint8_t,
-        pub state: uint8_t,
-        pub x: uint16_t,
-        pub y: uint16_t,
-        pub xrel: int16_t,
-        pub yrel: int16_t,
+        pub _type: u8,
+        pub which: u8,
+        pub state: u8,
+        pub x: u16,
+        pub y: u16,
+        pub xrel: i16,
+        pub yrel: i16,
     }
 
     #[repr(C)]
     #[derive(Copy, Clone)]
     pub struct SDL_MouseButtonEvent {
-        pub _type: uint8_t,
-        pub which: uint8_t,
-        pub button: uint8_t,
-        pub state: uint8_t,
-        pub x: uint16_t,
-        pub y: uint16_t,
+        pub _type: u8,
+        pub which: u8,
+        pub button: u8,
+        pub state: u8,
+        pub x: u16,
+        pub y: u16,
     }
 
     #[repr(C)]
     #[derive(Copy, Clone)]
     pub struct SDL_JoyAxisEvent {
-        pub _type: uint8_t,
-        pub which: uint8_t,
-        pub axis: uint8_t,
-        pub value: int16_t,
+        pub _type: u8,
+        pub which: u8,
+        pub axis: u8,
+        pub value: i16,
     }
 
     #[repr(C)]
     #[derive(Copy, Clone)]
     pub struct SDL_JoyBallEvent {
-        pub _type: uint8_t,
-        pub which: uint8_t,
-        pub ball: uint8_t,
-        pub xrel: int16_t,
-        pub yrel: int16_t,
+        pub _type: u8,
+        pub which: u8,
+        pub ball: u8,
+        pub xrel: i16,
+        pub yrel: i16,
     }
 
     #[repr(C)]
     #[derive(Copy, Clone)]
     pub struct SDL_JoyHatEvent {
-        pub _type: uint8_t,
-        pub which: uint8_t,
-        pub hat: uint8_t,
-        pub value: uint8_t,
+        pub _type: u8,
+        pub which: u8,
+        pub hat: u8,
+        pub value: u8,
     }
 
     #[repr(C)]
     #[derive(Copy, Clone)]
     pub struct SDL_JoyButtonEvent {
-        pub _type: uint8_t,
-        pub which: uint8_t,
-        pub button: uint8_t,
-        pub state: uint8_t,
+        pub _type: u8,
+        pub which: u8,
+        pub button: u8,
+        pub state: u8,
     }
 
     #[repr(C)]
     #[derive(Copy, Clone)]
     pub struct SDL_ResizeEvent {
-        pub _type: uint8_t,
+        pub _type: u8,
         pub w: c_int,
         pub h: c_int,
     }
@@ -146,19 +145,19 @@ pub mod ll {
     #[repr(C)]
     #[derive(Copy, Clone)]
     pub struct SDL_ExposeEvent {
-        pub _type: uint8_t,
+        pub _type: u8,
     }
 
     #[repr(C)]
     #[derive(Copy, Clone)]
     pub struct SDL_QuitEvent {
-        pub _type: uint8_t,
+        pub _type: u8,
     }
 
     #[repr(C)]
     #[derive(Copy, Clone)]
     pub struct SDL_UserEvent {
-        pub _type: uint8_t,
+        pub _type: u8,
         pub code: c_int,
         pub data1: *mut c_void,
         pub data2: *mut c_void,
@@ -167,12 +166,12 @@ pub mod ll {
     #[repr(C)]
     #[derive(Copy, Clone)]
     pub struct SDL_SysWMEvent {
-        pub _type: uint8_t,
+        pub _type: u8,
         pub msg: *mut SDL_SysWMmsg,
     }
 
     impl SDL_Event {
-        pub fn _type(&self) -> *const uint8_t {
+        pub fn _type(&self) -> *const u8 {
             unsafe { mem::transmute_copy(&self) }
         }
 
@@ -232,12 +231,12 @@ pub mod ll {
     extern "C" {
         pub fn SDL_PollEvent(event: *mut SDL_Event) -> c_int;
         pub fn SDL_WaitEvent(event: *mut SDL_Event) -> c_int;
-        pub fn SDL_EventState(_type: uint8_t, state: c_int) -> uint8_t;
-        pub fn SDL_GetKeyState(numkeys: *mut c_int) -> *mut uint8_t;
+        pub fn SDL_EventState(_type: u8, state: c_int) -> u8;
+        pub fn SDL_GetKeyState(numkeys: *mut c_int) -> *mut u8;
         pub fn SDL_GetModState() -> SDLMod;
-        pub fn SDL_GetKeyName(key: SDLKey) -> *mut c_schar;
+        pub fn SDL_GetKeyName(key: SDLKey) -> *mut c_char;
         pub fn SDL_JoystickEventState(state: c_int) -> c_int;
-        pub fn SDL_GetAppState() -> uint8_t;
+        pub fn SDL_GetAppState() -> u8;
         pub fn SDL_EnableUNICODE(enable: c_int) -> c_int;
         pub fn SDL_EnableKeyRepeat(delay: c_int, interval: c_int) -> c_int;
         pub fn SDL_SetModState(modstate: SDLMod);
@@ -249,30 +248,34 @@ pub mod ll {
 pub enum AppState {
     MouseFocus = ll::SDL_APPMOUSEFOCUS as isize,
     InputFocus = ll::SDL_APPINPUTFOCUS as isize,
-    Active = ll::SDL_APPACTIVE as isize
+    Active = ll::SDL_APPACTIVE as isize,
 }
 
 fn wrap_app_state(bitflags: u8) -> Vec<AppState> {
-    let flags = [AppState::MouseFocus,
-        AppState::InputFocus,
-        AppState::Active];
+    let flags = [AppState::MouseFocus, AppState::InputFocus, AppState::Active];
 
-    flags.iter().filter_map(|&flag| {
-        if bitflags & (flag as u8) != 0 { Some(flag) }
-        else { None }
-    }).collect()
+    flags
+        .iter()
+        .filter_map(|&flag| {
+            if bitflags & (flag as u8) != 0 {
+                Some(flag)
+            } else {
+                None
+            }
+        })
+        .collect()
 }
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum RepeatDelay {
     Default,
-    Custom(isize)
+    Custom(isize),
 }
 
 #[derive(PartialEq, Copy, Clone)]
 pub enum RepeatInterval {
     Default,
-    Custom(isize)
+    Custom(isize),
 }
 
 #[derive(PartialEq, Eq, PartialOrd, Ord, Copy, Clone)]
@@ -753,7 +756,9 @@ impl FromPrimitive for Key {
         })
     }
 
-    fn from_u64(n: u64) -> Option<Key> { FromPrimitive::from_i64(n as i64) }
+    fn from_u64(n: u64) -> Option<Key> {
+        FromPrimitive::from_i64(n as i64)
+    }
 }
 
 fn wrap_key(i: ll::SDLKey) -> Option<Key> {
@@ -762,23 +767,24 @@ fn wrap_key(i: ll::SDLKey) -> Option<Key> {
 
 #[derive(PartialEq, Eq, Copy, Clone)]
 pub enum Mod {
-     None = 0x0000,
-     LShift = 0x0001,
-     RShift = 0x0002,
-     LCtrl = 0x0040,
-     RCtrl = 0x0080,
-     LAlt = 0x0100,
-     RAlt = 0x0200,
-     LMeta = 0x0400,
-     RMeta = 0x0800,
-     Num = 0x1000,
-     Caps = 0x2000,
-     Mode = 0x4000,
-     Reserved = 0x8000
+    None = 0x0000,
+    LShift = 0x0001,
+    RShift = 0x0002,
+    LCtrl = 0x0040,
+    RCtrl = 0x0080,
+    LAlt = 0x0100,
+    RAlt = 0x0200,
+    LMeta = 0x0400,
+    RMeta = 0x0800,
+    Num = 0x1000,
+    Caps = 0x2000,
+    Mode = 0x4000,
+    Reserved = 0x8000,
 }
 
 fn wrap_mod_state(bitflags: ll::SDLMod) -> Vec<Mod> {
-    let flags = [Mod::None,
+    let flags = [
+        Mod::None,
         Mod::LShift,
         Mod::RShift,
         Mod::LCtrl,
@@ -790,12 +796,19 @@ fn wrap_mod_state(bitflags: ll::SDLMod) -> Vec<Mod> {
         Mod::Num,
         Mod::Caps,
         Mod::Mode,
-        Mod::Reserved];
+        Mod::Reserved,
+    ];
 
-    flags.iter().filter_map(|&flag| {
-        if bitflags & (flag as ll::SDLMod) != 0 { Some(flag) }
-        else { None }
-    }).collect()
+    flags
+        .iter()
+        .filter_map(|&flag| {
+            if bitflags & (flag as ll::SDLMod) != 0 {
+                Some(flag)
+            } else {
+                None
+            }
+        })
+        .collect()
 }
 
 #[derive(PartialEq, Eq, Copy, Clone)]
@@ -804,20 +817,28 @@ pub enum HatState {
     Up,
     Right,
     Down,
-    Left
+    Left,
 }
 
 fn wrap_hat_state(bitflags: u8) -> Vec<HatState> {
-    let flags = [HatState::Centered,
+    let flags = [
+        HatState::Centered,
         HatState::Up,
         HatState::Right,
         HatState::Down,
-        HatState::Left];
+        HatState::Left,
+    ];
 
-    flags.iter().filter_map(|&flag| {
-        if bitflags & (flag as u8) != 0 { Some(flag) }
-        else { None }
-    }).collect()
+    flags
+        .iter()
+        .filter_map(|&flag| {
+            if bitflags & (flag as u8) != 0 {
+                Some(flag)
+            } else {
+                None
+            }
+        })
+        .collect()
 }
 
 #[derive(PartialEq, Eq, Copy, Clone)]
@@ -826,7 +847,7 @@ pub enum Mouse {
     Middle,
     Right,
     WheelUp,
-    WheelDown
+    WheelDown,
 }
 
 impl FromPrimitive for Mouse {
@@ -841,7 +862,9 @@ impl FromPrimitive for Mouse {
         })
     }
 
-    fn from_u64(n: u64) -> Option<Mouse> { FromPrimitive::from_i64(n as i64) }
+    fn from_u64(n: u64) -> Option<Mouse> {
+        FromPrimitive::from_i64(n as i64)
+    }
 }
 
 fn wrap_mouse(bitflags: u8) -> Option<Mouse> {
@@ -856,40 +879,48 @@ pub enum MouseState {
     WheelUp,
     WheelDown,
     X1,
-    X2
+    X2,
 }
 
 fn wrap_mouse_state(bitflags: u8) -> Vec<MouseState> {
-    let flags = [MouseState::Left,
+    let flags = [
+        MouseState::Left,
         MouseState::Middle,
         MouseState::Right,
         MouseState::WheelUp,
         MouseState::WheelDown,
         MouseState::X1,
-        MouseState::X2];
+        MouseState::X2,
+    ];
 
-    flags.iter().filter_map(|&flag| {
-        if bitflags & (flag as u8) != 0 { Some(flag) }
-        else { None }
-    }).collect()
+    flags
+        .iter()
+        .filter_map(|&flag| {
+            if bitflags & (flag as u8) != 0 {
+                Some(flag)
+            } else {
+                None
+            }
+        })
+        .collect()
 }
 
 #[derive(PartialEq)]
 pub enum Event {
     // TODO: TextInput, TextEditing
-     None,
-     Active(bool, Vec<AppState>),
-     Key(Key, bool, Vec<Mod>, u16), // RFC: do you need the scancode?
-     MouseMotion(Vec<MouseState>, u16, u16, i16, i16),
-     MouseButton(Mouse, bool, u16, u16),
-     JoyAxis(isize, isize, i16),
-     JoyBall(isize, isize, i16, i16),
-     JoyHat(isize, isize, Vec<HatState>),
-     JoyButton(isize, isize, bool),
-     Quit,
+    None,
+    Active(bool, Vec<AppState>),
+    Key(Key, bool, Vec<Mod>, u16), // RFC: do you need the scancode?
+    MouseMotion(Vec<MouseState>, u16, u16, i16, i16),
+    MouseButton(Mouse, bool, u16, u16),
+    JoyAxis(isize, isize, i16),
+    JoyBall(isize, isize, i16, i16),
+    JoyHat(isize, isize, Vec<HatState>),
+    JoyButton(isize, isize, bool),
+    Quit,
     // TODO: SysWm
-     Resize(isize, isize),
-     Expose,
+    Resize(isize, isize),
+    Expose,
     // TODO: User
 }
 
@@ -900,99 +931,141 @@ fn null_event() -> ll::SDL_Event {
 fn wrap_event(raw: ll::SDL_Event) -> Event {
     unsafe {
         let ty = raw._type();
-        let ty = if ty.is_null() { return Event::None; }
-                 else { *ty };
+        let ty = if ty.is_null() {
+            return Event::None;
+        } else {
+            *ty
+        };
 
-        let ty : EventType = match FromPrimitive::from_usize(ty as usize) {
+        let ty: EventType = match FromPrimitive::from_usize(ty as usize) {
             Some(ty) => ty,
-            None => return Event::None
+            None => return Event::None,
         };
 
         match ty {
             EventType::None => Event::None,
             EventType::Active => {
                 let active = raw.active();
-                let active = if active.is_null() { return Event::None; }
-                             else { *active };
+                let active = if active.is_null() {
+                    return Event::None;
+                } else {
+                    *active
+                };
 
                 Event::Active(active.gain == 1, wrap_app_state(active.state))
             }
             EventType::KeyDown | EventType::KeyUp => {
                 let key = raw.key();
-                let (key, okey) = if key.is_null() { return Event::None; }
-                          else { ((*key).keysym, *key) };
+                let (key, okey) = if key.is_null() {
+                    return Event::None;
+                } else {
+                    ((*key).keysym, *key)
+                };
 
                 match wrap_key(key.sym) {
                     Some(sym) => {
-                        Event::Key(sym, okey.state == 1, wrap_mod_state(key._mod),
-                                 key.unicode)
+                        Event::Key(sym, okey.state == 1, wrap_mod_state(key._mod), key.unicode)
                     }
-                    None => Event::None
+                    None => Event::None,
                 }
             }
             EventType::MouseMotion => {
                 let motion = raw.motion();
-                let motion = if motion.is_null() { return Event::None; }
-                             else { *motion };
+                let motion = if motion.is_null() {
+                    return Event::None;
+                } else {
+                    *motion
+                };
 
-                Event::MouseMotion(wrap_mouse_state(motion.state), motion.x,
-                                 motion.y, motion.xrel, motion.yrel)
+                Event::MouseMotion(
+                    wrap_mouse_state(motion.state),
+                    motion.x,
+                    motion.y,
+                    motion.xrel,
+                    motion.yrel,
+                )
             }
             EventType::MouseButtonDown | EventType::MouseButtonUp => {
                 let obutton = raw.button();
-                let obutton = if obutton.is_null() { return Event::None; }
-                             else { *obutton };
+                let obutton = if obutton.is_null() {
+                    return Event::None;
+                } else {
+                    *obutton
+                };
 
                 match wrap_mouse(obutton.button) {
                     Some(button) => {
-                        Event::MouseButton(button, obutton.state == 1,
-                                 obutton.x, obutton.y)
+                        Event::MouseButton(button, obutton.state == 1, obutton.x, obutton.y)
                     }
-                    None => Event::None
+                    None => Event::None,
                 }
             }
             EventType::JoyAxisMotion => {
                 let jaxis = raw.jaxis();
-                let jaxis = if jaxis.is_null() { return Event::None; }
-                            else { *jaxis };
+                let jaxis = if jaxis.is_null() {
+                    return Event::None;
+                } else {
+                    *jaxis
+                };
 
-                Event::JoyAxis(jaxis.which as isize, jaxis.axis as isize,
-                             jaxis.value)
+                Event::JoyAxis(jaxis.which as isize, jaxis.axis as isize, jaxis.value)
             }
             EventType::JoyBallMotion => {
                 let jball = raw.jball();
-                let jball = if jball.is_null() { return Event::None; }
-                            else { *jball };
+                let jball = if jball.is_null() {
+                    return Event::None;
+                } else {
+                    *jball
+                };
 
-                Event::JoyBall(jball.which as isize, jball.ball as isize,
-                             jball.xrel, jball.yrel)
+                Event::JoyBall(
+                    jball.which as isize,
+                    jball.ball as isize,
+                    jball.xrel,
+                    jball.yrel,
+                )
             }
             EventType::JoyHatMotion => {
                 let jhat = raw.jhat();
-                let jhat = if jhat.is_null() { return Event::None; }
-                           else { *jhat };
+                let jhat = if jhat.is_null() {
+                    return Event::None;
+                } else {
+                    *jhat
+                };
 
-                Event::JoyHat(jhat.which as isize, jhat.hat as isize,
-                            wrap_hat_state(jhat.value))
+                Event::JoyHat(
+                    jhat.which as isize,
+                    jhat.hat as isize,
+                    wrap_hat_state(jhat.value),
+                )
             }
             EventType::JoyButtonDown | EventType::JoyButtonUp => {
                 let jbutton = raw.jbutton();
-                let jbutton = if jbutton.is_null() { return Event::None; }
-                              else { *jbutton };
+                let jbutton = if jbutton.is_null() {
+                    return Event::None;
+                } else {
+                    *jbutton
+                };
 
-                Event::JoyButton(jbutton.which as isize, jbutton.button as isize,
-                               jbutton.state == 1u8)
+                Event::JoyButton(
+                    jbutton.which as isize,
+                    jbutton.button as isize,
+                    jbutton.state == 1u8,
+                )
             }
             EventType::Quit => Event::Quit,
             EventType::Resize => {
                 let resize = raw.resize();
-                let resize = if resize.is_null() { return Event::None; }
-                             else { *resize };
+                let resize = if resize.is_null() {
+                    return Event::None;
+                } else {
+                    *resize
+                };
 
                 Event::Resize(resize.w as isize, resize.h as isize)
             }
             EventType::Expose => Event::Expose,
-            _ => Event::None
+            _ => Event::None,
         }
     }
 }
@@ -1020,8 +1093,12 @@ pub enum EventType {
 }
 
 impl EventType {
-    pub fn get_state(&self) -> bool { get_event_state(*self) }
-    pub fn set_state(&self, state: bool) { set_event_state(*self, state) }
+    pub fn get_state(&self) -> bool {
+        get_event_state(*self)
+    }
+    pub fn set_state(&self, state: bool) {
+        set_event_state(*self, state)
+    }
 }
 
 impl FromPrimitive for EventType {
@@ -1048,22 +1125,28 @@ impl FromPrimitive for EventType {
         })
     }
 
-    fn from_u64(n: u64) -> Option<EventType> { FromPrimitive::from_i64(n as i64) }
+    fn from_u64(n: u64) -> Option<EventType> {
+        FromPrimitive::from_i64(n as i64)
+    }
 }
 
 pub fn pump_events() {
-    unsafe { ll::SDL_PumpEvents(); }
+    unsafe {
+        ll::SDL_PumpEvents();
+    }
 }
 
 // TODO: peep_events (a tricky one but doable)
 
 pub fn wait_event() -> Event {
     let mut raw = null_event();
-    let success = unsafe { ll::SDL_WaitEvent(&mut raw)
-                            == 1 as c_int };
+    let success = unsafe { ll::SDL_WaitEvent(&mut raw) == 1 as c_int };
 
-    if success { wrap_event(raw) }
-    else { Event::None }
+    if success {
+        wrap_event(raw)
+    } else {
+        Event::None
+    }
 }
 
 pub fn poll_event() -> Event {
@@ -1082,12 +1165,13 @@ pub fn poll_event() -> Event {
 // TODO: set_event_filter, get_event_filter
 
 pub fn set_event_state(ty: EventType, state: bool) {
-    unsafe { ll::SDL_EventState(ty as u8, state as c_int); }
+    unsafe {
+        ll::SDL_EventState(ty as u8, state as c_int);
+    }
 }
 
 pub fn get_event_state(ty: EventType) -> bool {
-    unsafe { ll::SDL_EventState(ty as u8, ll::SDL_QUERY as c_int)
-             == ll::SDL_ENABLE as u8 }
+    unsafe { ll::SDL_EventState(ty as u8, ll::SDL_QUERY as c_int) == ll::SDL_ENABLE as u8 }
 }
 
 pub fn get_key_state() -> Vec<(Key, bool)> {
@@ -1097,14 +1181,16 @@ pub fn get_key_state() -> Vec<(Key, bool)> {
 
     let buf = data as *const u8;
     let buf = unsafe { slice::from_raw_parts(buf, num as usize) };
-    buf.iter().filter_map(|&state| {
-        i += 1;
+    buf.iter()
+        .filter_map(|&state| {
+            i += 1;
 
-        match wrap_key(i as ll::SDLKey) {
-            Some(key) => Some((key, state == 1)),
-            None => None
-        }
-    }).collect()
+            match wrap_key(i as ll::SDLKey) {
+                Some(key) => Some((key, state == 1)),
+                None => None,
+            }
+        })
+        .collect()
 }
 
 pub fn get_mod_state() -> Vec<Mod> {
@@ -1113,9 +1199,11 @@ pub fn get_mod_state() -> Vec<Mod> {
 
 pub fn set_mod_state(states: &[Mod]) {
     unsafe {
-        ll::SDL_SetModState(states.iter().fold(0u32, |states, &state| {
-            states | state as ll::SDLMod
-        }));
+        ll::SDL_SetModState(
+            states
+                .iter()
+                .fold(0u32, |states, &state| states | state as ll::SDLMod),
+        );
     }
 }
 
@@ -1123,7 +1211,9 @@ pub fn get_key_name(key: Key) -> String {
     unsafe {
         let cstr = ll::SDL_GetKeyName(key as ll::SDLKey);
 
-        str::from_utf8(CStr::from_ptr(mem::transmute_copy(&cstr)).to_bytes()).unwrap().to_string()
+        str::from_utf8(CStr::from_ptr(mem::transmute_copy(&cstr)).to_bytes())
+            .unwrap()
+            .to_string()
     }
 }
 
@@ -1134,9 +1224,7 @@ pub fn set_joystick_event_state(state: bool) {
 }
 
 pub fn get_joystick_event_state() -> bool {
-    unsafe {
-        ll::SDL_JoystickEventState(ll::SDL_QUERY as c_int) == ll::SDL_ENABLE as c_int
-    }
+    unsafe { ll::SDL_JoystickEventState(ll::SDL_QUERY as c_int) == ll::SDL_ENABLE as c_int }
 }
 
 pub fn toggle_joystick_event_state() {
@@ -1150,7 +1238,9 @@ pub fn get_app_state() -> Vec<AppState> {
 }
 
 pub fn enable_unicode(enable: bool) {
-    unsafe { ll::SDL_EnableUNICODE(enable as c_int); }
+    unsafe {
+        ll::SDL_EnableUNICODE(enable as c_int);
+    }
 }
 
 pub fn is_unicode_enabled() -> bool {
@@ -1160,16 +1250,14 @@ pub fn is_unicode_enabled() -> bool {
 pub fn enable_key_repeat(delay: RepeatDelay, interval: RepeatInterval) -> bool {
     let delay = match delay {
         RepeatDelay::Default => 500,
-        RepeatDelay::Custom(delay) => delay
+        RepeatDelay::Custom(delay) => delay,
     };
     let interval = match interval {
         RepeatInterval::Default => 30,
-        RepeatInterval::Custom(interval) => interval
+        RepeatInterval::Custom(interval) => interval,
     };
 
-    unsafe {
-        ll::SDL_EnableKeyRepeat(delay as c_int, interval as c_int) == 0 as c_int
-    }
+    unsafe { ll::SDL_EnableKeyRepeat(delay as c_int, interval as c_int) == 0 as c_int }
 }
 
 // get_mouse_state, get_relative_mouse_state, start_text_input, stop_text_input, set_text_input_rect

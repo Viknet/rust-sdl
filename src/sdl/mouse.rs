@@ -5,7 +5,7 @@ use get_error;
 pub mod ll {
     #![allow(non_camel_case_types)]
 
-    use libc::{c_void, c_int, uint8_t, uint16_t, int16_t};
+    use libc::{c_int, c_void};
 
     use Rect;
 
@@ -18,60 +18,77 @@ pub mod ll {
     #[repr(C)]
     #[derive(Copy, Clone)]
     pub struct SDL_Cursor {
-         pub area: Rect,
-         pub hot_x: int16_t,
-         pub hot_y: int16_t,
-         pub data: *mut uint8_t,
-         pub mask: *mut uint8_t,
-         pub save: [*mut uint8_t; 2],
-         pub wm_cursor: *mut WMcursor,
+        pub area: Rect,
+        pub hot_x: i16,
+        pub hot_y: i16,
+        pub data: *mut u8,
+        pub mask: *mut u8,
+        pub save: [*mut u8; 2],
+        pub wm_cursor: *mut WMcursor,
     }
 
     extern "C" {
         pub fn SDL_ShowCursor(toggle: c_int) -> c_int;
-        pub fn SDL_CreateCursor(data: *mut uint8_t,
-                                mask: *mut uint8_t,
-                                w: c_int,
-                                h: c_int,
-                                hot_x: c_int,
-                                hot_y: c_int)
-                    -> *mut SDL_Cursor;
+        pub fn SDL_CreateCursor(
+            data: *mut u8,
+            mask: *mut u8,
+            w: c_int,
+            h: c_int,
+            hot_x: c_int,
+            hot_y: c_int,
+        ) -> *mut SDL_Cursor;
         pub fn SDL_SetCursor(cursor: *mut SDL_Cursor);
         pub fn SDL_GetCursor() -> *mut SDL_Cursor;
         pub fn SDL_FreeCursor(cursor: *mut SDL_Cursor);
-        pub fn SDL_WarpMouse(x: uint16_t, y: uint16_t);
+        pub fn SDL_WarpMouse(x: u16, y: u16);
     }
 }
 
 pub fn warp_mouse(x: u16, y: u16) {
-    unsafe { ll::SDL_WarpMouse(x, y); }
+    unsafe {
+        ll::SDL_WarpMouse(x, y);
+    }
 }
 
 #[derive(PartialEq)]
 pub struct Cursor {
     pub raw: *mut ll::SDL_Cursor,
-    pub owned: bool
+    pub owned: bool,
 }
 
 fn wrap_cursor(raw: *mut ll::SDL_Cursor, owned: bool) -> Cursor {
     Cursor {
         raw: raw,
-        owned: owned
+        owned: owned,
     }
 }
 
 impl Cursor {
-    pub fn new(data: &[u8], mask: &[u8], w: isize, h: isize, hot_x: isize, hot_y: isize)
-            -> Result<Cursor, String> {
+    pub fn new(
+        data: &[u8],
+        mask: &[u8],
+        w: isize,
+        h: isize,
+        hot_x: isize,
+        hot_y: isize,
+    ) -> Result<Cursor, String> {
         let mut data = data.to_vec();
         let mut mask = mask.to_vec();
         unsafe {
-            let raw = ll::SDL_CreateCursor(data.as_mut_ptr(), mask.as_mut_ptr(),
-                                           w as c_int, h as c_int, hot_x as c_int,
-                                           hot_y as c_int);
+            let raw = ll::SDL_CreateCursor(
+                data.as_mut_ptr(),
+                mask.as_mut_ptr(),
+                w as c_int,
+                h as c_int,
+                hot_x as c_int,
+                hot_y as c_int,
+            );
 
-                if raw.is_null() { Err(get_error()) }
-                else { Ok(wrap_cursor(raw, true)) }
+            if raw.is_null() {
+                Err(get_error())
+            } else {
+                Ok(wrap_cursor(raw, true))
+            }
         }
     }
 }
@@ -87,7 +104,9 @@ impl Drop for Cursor {
 }
 
 pub fn set_cursor(cursor: &Cursor) {
-    unsafe { ll::SDL_SetCursor(cursor.raw); }
+    unsafe {
+        ll::SDL_SetCursor(cursor.raw);
+    }
 }
 
 pub fn get_cursor() -> Cursor {
@@ -95,7 +114,9 @@ pub fn get_cursor() -> Cursor {
 }
 
 pub fn set_cursor_visible(visible: bool) {
-    unsafe { ll::SDL_ShowCursor(visible as c_int); }
+    unsafe {
+        ll::SDL_ShowCursor(visible as c_int);
+    }
 }
 
 pub fn toggle_cursor_visible() {

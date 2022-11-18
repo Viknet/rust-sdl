@@ -24,3 +24,6 @@ SDL_mixer and SDL_image are available through separate packages, from within the
 
 # When things go wrong
 Rust, and Rust-SDL, are both still heavily in development, and you may run into teething issues when using this. Before panicking, check that you're using the latest Master branch of Rust, check that you've updated Rust-SDL to the latest version, and run `cargo clean`. If that fails, please let us know on the issue tracker.
+
+# Updates
+Bare SDL_ttf implementation from [@miketang84 fork](https://github.com/miketang84/rust-sdl/)
